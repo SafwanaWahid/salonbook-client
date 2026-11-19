@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal, ArrowDownUp } from "lucide-react";
 import type { Service } from "@/data/services";
 import { categories } from "@/data/services";
@@ -9,9 +9,19 @@ import { ServiceCard } from "@/components/service-card";
 
 export function ServicesBrowser({ services }: { services: Service[] }) {
   const params = useSearchParams();
-  const [query, setQuery] = useState("");
+  const pathname = usePathname();
+  const router = useRouter();
+  const [query, setQuery] = useState(params.get("q") ?? "");
   const [category, setCategory] = useState(params.get("category") ?? "All services");
-  const [sort, setSort] = useState("recommended");
+  const [sort, setSort] = useState(params.get("sort") ?? "recommended");
+  useEffect(() => {
+    const next = new URLSearchParams();
+    if (query.trim()) next.set("q", query.trim());
+    if (category !== "All services") next.set("category", category);
+    if (sort !== "recommended") next.set("sort", sort);
+    const suffix = next.toString();
+    router.replace(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false });
+  }, [category, pathname, query, router, sort]);
   const visible = useMemo(() => {
     const result = services.filter((service) => service.status === "active" && service.serviceName.toLowerCase().includes(query.toLowerCase()) && (category === "All services" || service.category === category));
     if (sort === "price-low") result.sort((a, b) => a.price - b.price);
