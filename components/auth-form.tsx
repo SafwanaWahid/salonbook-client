@@ -25,7 +25,9 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       if (result.error) throw new Error(result.error.message || "Could not authenticate.");
       const { user } = await ensureAccessToken();
       toast.success(isSignup ? "Your account is ready." : "Welcome back.");
-      router.push(user.role === "admin" ? "/dashboard/admin" : "/dashboard/customer");
+      const next = new URLSearchParams(window.location.search).get("next");
+      const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : null;
+      router.push(user.role === "admin" ? "/dashboard/admin" : safeNext || "/dashboard/customer");
       router.refresh();
     } catch (error) { toast.error(error instanceof Error ? error.message : "Please try again."); }
     finally { setBusy(false); }
