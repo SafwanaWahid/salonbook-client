@@ -20,7 +20,7 @@ Next.js, React, TypeScript, Better Auth, Tailwind CSS, and the SalonBook Express
 
 ## Run locally
 
-1. Start the server by following [the server setup](../salonbook-server/README.md).
+1. Start the API by following the setup steps in the separate SalonBook Server repository.
 2. Copy `.env.example` to `.env.local` and set the API and application URLs.
 3. Install dependencies with `npm install`.
 4. Start Next.js with `npm run dev` and open `http://localhost:3000`.
