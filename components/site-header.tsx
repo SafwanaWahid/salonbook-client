@@ -33,7 +33,7 @@ export function SiteHeader() {
   }
 
   const dashboardHref =
-    (data?.user as typeof data.user & { role?: string } | undefined)?.role === "admin"
+    (data?.user as { role?: string } | undefined)?.role === "admin"
       ? "/dashboard/admin"
       : "/dashboard/customer";
 
@@ -41,8 +41,12 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="header-inner">
         <Link className="brand" href="/" aria-label="SalonBook home">
-          <span className="brand-mark"><Scissors size={19} strokeWidth={1.8} /></span>
-          <span>salon<span className="brand-light">book</span><i>.</i></span>
+          <span className="brand-mark">
+            <Scissors size={19} strokeWidth={1.8} />
+          </span>
+          <span>
+            salon<span className="brand-light">book</span><i>.</i>
+          </span>
         </Link>
 
         <nav className="desktop-nav" aria-label="Main navigation">
@@ -64,20 +68,27 @@ export function SiteHeader() {
                   setAccountOpen((current) => !current);
                 }}
               >
-                <span className="header-avatar"><UserRound size={15} /></span>
+                <span className="header-avatar">
+                  <UserRound size={15} />
+                </span>
                 <span>{data.user.name?.split(" ")[0] || "Account"}</span>
                 <ChevronDown size={13} />
               </button>
+
               {accountOpen && (
                 <div className="header-dropdown">
-                  <Link href={dashboardHref} onClick={closeMenus}>Dashboard</Link>
+                  <Link href={dashboardHref} onClick={closeMenus}>
+                    Dashboard
+                  </Link>
                   <button onClick={signOut}>Sign out</button>
                 </div>
               )}
             </div>
           ) : (
             <>
-              <Link className="header-login" href="/sign-in">Sign in</Link>
+              <Link className="header-login" href="/sign-in">
+                Sign in
+              </Link>
               <Link className="button button-dark header-cta" href="/services">
                 Book an appointment <ArrowUpRight size={15} />
               </Link>
@@ -103,7 +114,9 @@ export function SiteHeader() {
             <Link href="/services" onClick={closeMenus}>Services</Link>
             <Link href="/#about" onClick={closeMenus}>Our story</Link>
             {data ? (
-              <Link href={dashboardHref} onClick={closeMenus}>My dashboard</Link>
+              <Link href={dashboardHref} onClick={closeMenus}>
+                My dashboard
+              </Link>
             ) : (
               <Link href="/sign-in" onClick={closeMenus}>Sign in</Link>
             )}
