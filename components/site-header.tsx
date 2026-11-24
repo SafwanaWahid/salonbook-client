@@ -11,22 +11,105 @@ import { apiFetch } from "@/lib/api";
 export function SiteHeader() {
   const router = useRouter();
   const { data, isPending } = authClient.useSession();
-  const [open, setOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  function closeMenus() {
+    setAccountOpen(false);
+    setMobileOpen(false);
+  }
+
   async function signOut() {
     try {
       await authClient.signOut();
       await apiFetch("/token", { method: "DELETE" });
-      setOpen(false);
+      closeMenus();
       toast.success("You have signed out.");
       router.push("/");
       router.refresh();
-    } catch { toast.error("Could not sign out. Please try again."); }
+    } catch {
+      toast.error("Could not sign out. Please try again.");
+    }
   }
-  return <header className="site-header"><div className="header-inner">
-    <Link className="brand" href="/" aria-label="SalonBook home"><span className="brand-mark"><Scissors size={19} strokeWidth={1.8} /></span><span>salon<span className="brand-light">book</span><i>.</i></span></Link>
-    <nav className="desktop-nav" aria-label="Main navigation"><Link href="/">Home</Link><Link href="/services">Services</Link><Link href="/#about">Our story</Link></nav>
-    <div className="header-actions">{isPending ? <span className="avatar-placeholder"/> : data ? <div className="header-account"><button className="header-account-trigger" onClick={() => setOpen(!open)} aria-expanded={open}><span className="header-avatar"><UserRound size={15}/></span><span>{data.user.name?.split(" ")[0] || "Account"}</span><ChevronDown size={13}/></button>{open && <div className="header-dropdown"><Link href={(data.user as typeof data.user & { role?: string }).role === "admin" ? "/dashboard/admin" : "/dashboard/customer"} onClick={() => setOpen(false)}>Dashboard</Link><button onClick={signOut}>Sign out</button></div>}</div> : <><Link className="header-login" href="/sign-in">Sign in</Link><Link className="button button-dark header-cta" href="/services">Book an appointment <ArrowUpRight size={15}/></Link></>}</div>
-    <button className="mobile-menu" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen(!open)}><Menu size={22}/></button>
-    {open && <div className="mobile-nav"><Link href="/" onClick={() => setOpen(false)}>Home</Link><Link href="/services" onClick={() => setOpen(false)}>Services</Link><Link href="/#about" onClick={() => setOpen(false)}>Our story</Link>{data ? <Link href={(data.user as typeof data.user & { role?: string }).role === "admin" ? "/dashboard/admin" : "/dashboard/customer"} onClick={() => setOpen(false)}>My dashboard</Link> : <Link href="/sign-in" onClick={() => setOpen(false)}>Sign in</Link>}</div>}
-  </div></header>;
+
+  const dashboardHref =
+    (data?.user as typeof data.user & { role?: string } | undefined)?.role === "admin"
+      ? "/dashboard/admin"
+      : "/dashboard/customer";
+
+  return (
+    <header className="site-header">
+      <div className="header-inner">
+        <Link className="brand" href="/" aria-label="SalonBook home">
+          <span className="brand-mark"><Scissors size={19} strokeWidth={1.8} /></span>
+          <span>salon<span className="brand-light">book</span><i>.</i></span>
+        </Link>
+
+        <nav className="desktop-nav" aria-label="Main navigation">
+          <Link href="/">Home</Link>
+          <Link href="/services">Services</Link>
+          <Link href="/#about">Our story</Link>
+        </nav>
+
+        <div className="header-actions">
+          {isPending ? (
+            <span className="avatar-placeholder" />
+          ) : data ? (
+            <div className="header-account">
+              <button
+                className="header-account-trigger"
+                aria-expanded={accountOpen}
+                onClick={() => {
+                  setMobileOpen(false);
+                  setAccountOpen((current) => !current);
+                }}
+              >
+                <span className="header-avatar"><UserRound size={15} /></span>
+                <span>{data.user.name?.split(" ")[0] || "Account"}</span>
+                <ChevronDown size={13} />
+              </button>
+              {accountOpen && (
+                <div className="header-dropdown">
+                  <Link href={dashboardHref} onClick={closeMenus}>Dashboard</Link>
+                  <button onClick={signOut}>Sign out</button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link className="header-login" href="/sign-in">Sign in</Link>
+              <Link className="button button-dark header-cta" href="/services">
+                Book an appointment <ArrowUpRight size={15} />
+              </Link>
+            </>
+          )}
+        </div>
+
+        <button
+          className="mobile-menu"
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
+          onClick={() => {
+            setAccountOpen(false);
+            setMobileOpen((current) => !current);
+          }}
+        >
+          <Menu size={22} />
+        </button>
+
+        {mobileOpen && (
+          <div className="mobile-nav">
+            <Link href="/" onClick={closeMenus}>Home</Link>
+            <Link href="/services" onClick={closeMenus}>Services</Link>
+            <Link href="/#about" onClick={closeMenus}>Our story</Link>
+            {data ? (
+              <Link href={dashboardHref} onClick={closeMenus}>My dashboard</Link>
+            ) : (
+              <Link href="/sign-in" onClick={closeMenus}>Sign in</Link>
+            )}
+          </div>
+        )}
+      </div>
+    </header>
+  );
 }
